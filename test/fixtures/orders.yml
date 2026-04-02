@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  external_id: MyString
+  place_at: MyString
+  locked_at: 2026-04-02 16:26:54
+
+two:
+  external_id: MyString
+  place_at: MyString
+  locked_at: 2026-04-02 16:26:54

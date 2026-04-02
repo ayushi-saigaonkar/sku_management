@@ -1,0 +1,2 @@
+class SkuStatsController < ApplicationController
+end
