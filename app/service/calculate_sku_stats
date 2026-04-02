@@ -1,19 +1,32 @@
-class CalculateSkuStats 
-  
+class CalculateSkuStats
   def initialize(order)
     @order = order
   end
 
   def call
-    return if order.locked_at.present?
-    line_items = @order.line_items
-    line_items.each do |line_items|
-    if line_item.original == true && line_item.quantity.present? && line_item.quantity > 0 
-      sku_stat = SkuStat.find_by(sku: "%#{line_item.sku}%")
-      sku_stat.total_quantity += line_item.quantity 
-      sku_stat.save
+    return if @order.locked_at.present?
+
+    skus = @order.line_items.where(original: true).pluck(:sku).uniq
+
+    skus.each do |sku|
+      total = LineItem
+                .where(sku: sku, original: true)
+                .sum(:quantity)
+
+      sku_stat = SkuStat.find_or_initialize_by(
+        sku: sku,
+        week: current_week
+      )
+
+      sku_stat.total_quantity = total
+      sku_stat.save!
     end
   end
+
+  private
+
+  def current_week
+    date = Date.today
+    "#{date.cwyear}-W#{date.cweek}"
+  end
 end
-
-
