@@ -1,0 +1,19 @@
+class CalculateSkuStats 
+  
+  def initialize(order)
+    @order = order
+  end
+
+  def call
+    return if order.locked_at.present?
+    line_items = @order.line_items
+    line_items.each do |line_items|
+    if line_item.original == true && line_item.quantity.present? && line_item.quantity > 0 
+      sku_stat = SkuStat.find_by(sku: "%#{line_item.sku}%")
+      sku_stat.total_quantity += line_item.quantity 
+      sku_stat.save
+    end
+  end
+end
+
+

@@ -13,5 +13,5 @@ Rails.application.routes.draw do
       post :lock
     end
   end
-  get "sku_summary/index" => "sku_stats#index"
+  resources :sku_stats
 end
