@@ -1,24 +1,79 @@
-# README
+# Order Intake & SKU Stats System
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is a Rails API application that handles sku management.
 
-Things you may want to cover:
+---
 
-* Ruby version
+Setup
+bundle install
+rails db:create db:migrate
+rails server
 
-* System dependencies
+Models
+Order
+external_id (unique)
+placed_at
+locked_at
 
-* Configuration
+LineItem
+sku
+quantity
+original (used for versioning corrections)
 
-* Database creation
+SkuStat
+sku
+week
+total_quantity
+API Endpoints
+Create Order
 
-* Database initialization
+POST /orders
 
-* How to run the test suite
+Example:
 
-* Services (job queues, cache servers, search engines, etc.)
+{
+  "external_id": "SAP-ORDER-1234",
+  "placed_at": "2025-04-17T12:00:00Z",
+  "line_items": [
+    { "sku": "SKU123", "quantity": 10 },
+    { "sku": "SKU456", "quantity": 5 }
+  ]
+}
+Lock Order
 
-* Deployment instructions
+POST /orders/:id/lock
 
-* ...
+Locks the order permanently and prevents further updates.
+
+SKU Stats
+
+GET /sku_stats?sku=SKU123
+
+Returns precomputed SKU statistics with optional pagination.
+ 
+ 
+Idempotency
+
+Orders are uniquely identified using external_id.
+
+If the same order is received again:
+
+Existing line items are marked as original: false
+New line items are created as the latest version
+
+This ensures safe correction handling without mutating past data.
+
+Order Correction Rules
+Orders can be updated within 15 minutes of creation
+Orders cannot be modified if:
+They are locked
+They are older than 15 minutes
+
+
+Background Processing
+SKU stats are calculated asynchronously using ActiveJob.
+Triggered after order creation/update/lock
+Uses latest original: true line items
+Aggregates quantity using database .sum
+
+
